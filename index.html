@@ -742,34 +742,185 @@
 
         /* 响应式设计 */
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                min-height: 100vh;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+
             .game-area {
                 flex-direction: column;
                 align-items: center;
+                margin: 0;
+                gap: 15px;
             }
 
             .couplet {
+                position: static;
                 width: 100%;
-                max-width: 300px;
-                margin: 10px 0;
+                max-width: 280px;
+                margin: 5px 0;
+                padding: 15px 10px;
             }
 
             .couplet-text {
                 writing-mode: horizontal-tb;
                 text-orientation: mixed;
+                font-size: 1.2rem;
+                text-align: center;
+            }
+
+            .lantern-container {
+                order: 2;
+                margin: 10px 0;
             }
 
             .lantern {
-                width: 250px;
-                height: 350px;
+                width: 200px;
+                height: 280px;
+                margin: 0;
             }
 
             .lantern-body {
-                width: 200px;
-                height: 200px;
+                width: 160px;
+                height: 160px;
             }
 
+            .riddle-text {
+                font-size: 1rem;
+                padding: 15px;
+                max-width: 140px;
+                line-height: 1.4;
+            }
+
+            .riddle-hint {
+                font-size: 0.9rem;
+                margin-top: 5px;
+            }
+
+            .answer-area {
+                order: 3;
+                margin: 20px 0 10px 0;
+                padding: 20px 15px;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .score-display {
+                font-size: 16px;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .header-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .header-buttons button {
+                flex: 1;
+                min-width: 80px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .answer-input {
+                width: 100%;
+                max-width: 100%;
+                padding: 15px;
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .button-group .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .leaderboard {
+                margin: 20px 0;
+                padding: 20px 15px;
+            }
+
+            .leaderboard h3 {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+
+            .leaderboard-item {
+                padding: 8px 12px;
+                margin: 3px 0;
+            }
+
+            .rank, .username, .score {
+                font-size: 14px;
+            }
+
+            /* 隐藏对联在移动端 */
+            .couplet-left, .couplet-right {
+                display: none;
+            }
+        }
+
+        /* 超小屏幕优化 */
+        @media (max-width: 480px) {
             h1 {
-                font-size: 2rem;
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .lantern {
+                width: 180px;
+                height: 250px;
+            }
+
+            .lantern-body {
+                width: 140px;
+                height: 140px;
+            }
+
+            .riddle-text {
+                font-size: 0.9rem;
+                padding: 12px;
+                max-width: 120px;
+            }
+
+            .answer-area {
+                padding: 15px 10px;
+            }
+
+            .answer-input {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .button-group .btn {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .header-buttons button {
+                padding: 6px 8px;
+                font-size: 11px;
             }
         }
 
@@ -2378,7 +2529,7 @@
     
     <!-- 版权信息 -->
     <div style="text-align: center; color: white; font-size: 12px; margin: 20px 0;">
-       © 2025-riddle.mumulife.net版权所有
+       © 2025 riddle.mumulife.net版权所有
     </div>
 </body>
 </html>
