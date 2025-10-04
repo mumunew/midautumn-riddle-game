@@ -6,6 +6,7 @@
     <title>中秋灯谜会</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="riddles.js"></script>
+    <script src="music.js"></script>
     <style>
         * {
             margin: 0;
@@ -345,6 +346,94 @@
          .answers-btn:hover {
              background: linear-gradient(45deg, #1976D2, #1E88E5);
              transform: translateY(-1px);
+         }
+
+         /* 音乐控制按钮样式 */
+         .music-btn {
+             background: linear-gradient(45deg, #9C27B0, #BA68C8);
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 6px;
+             font-size: 16px;
+             cursor: pointer;
+             transition: all 0.2s;
+             position: relative;
+         }
+
+         .music-btn:hover {
+             background: linear-gradient(45deg, #7B1FA2, #9C27B0);
+             transform: translateY(-1px);
+         }
+
+         /* 音乐菜单样式 */
+         .music-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            min-width: 200px;
+            z-index: 1000;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .music-menu.show {
+            display: block !important;
+            animation: fadeInDown 0.3s ease-out;
+        }
+
+         .music-menu-header {
+             padding: 15px;
+             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+             text-align: center;
+             font-weight: bold;
+             color: #d32f2f;
+         }
+
+         .music-option {
+             padding: 12px 15px;
+             cursor: pointer;
+             transition: all 0.2s;
+             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+         }
+
+         .music-option:hover {
+             background: rgba(156, 39, 176, 0.1);
+         }
+
+         .music-option.active {
+             background: rgba(156, 39, 176, 0.2);
+             color: #9C27B0;
+             font-weight: bold;
+         }
+
+         .music-option:last-child {
+             border-bottom: none;
+             border-radius: 0 0 10px 10px;
+         }
+
+         .music-status {
+             font-size: 12px;
+             opacity: 0.7;
+         }
+
+         @keyframes fadeInDown {
+             from {
+                 opacity: 0;
+                 transform: translateY(-10px);
+             }
+             to {
+                 opacity: 1;
+                 transform: translateY(0);
+             }
          }
 
         /* 游戏界面样式 */
@@ -893,9 +982,31 @@
 
             .header-buttons button {
                 flex: 1;
-                min-width: 80px;
-                padding: 8px 12px;
-                font-size: 12px;
+                min-width: 70px;
+                padding: 6px 8px;
+                font-size: 11px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* 移动端音乐控制优化 */
+            .music-btn {
+                min-width: 50px !important;
+                padding: 6px 8px !important;
+                font-size: 14px !important;
+            }
+
+            .music-menu {
+                width: 280px !important;
+                max-width: 90vw !important;
+                right: 5px !important;
+                top: 45px !important;
+            }
+
+            .music-option {
+                padding: 12px 15px !important;
+                font-size: 14px !important;
             }
 
             .answer-input {
@@ -996,6 +1107,48 @@
                 padding: 6px 8px;
                 font-size: 11px;
             }
+
+            /* 移动端音乐设置弹窗优化 */
+            .music-settings-container {
+                padding: 5px 0;
+            }
+
+            .music-options-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .music-option-card {
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                text-align: left;
+            }
+
+            .music-option-card .music-icon {
+                font-size: 20px;
+                margin-right: 12px;
+                margin-bottom: 0;
+            }
+
+            .music-option-card .music-name {
+                flex: 1;
+                margin-bottom: 0;
+            }
+
+            .music-option-card .music-status {
+                position: static;
+                margin-left: 10px;
+            }
+
+            .volume-slider-container {
+                gap: 10px;
+            }
+
+            #volumeValue {
+                min-width: 35px;
+                font-size: 14px;
+            }
         }
 
         .hidden {
@@ -1093,6 +1246,187 @@
         .modal-btn.cancel-btn:hover {
             background: white;
             color: #ff6b6b;
+        }
+
+        /* 音乐设置弹窗专用样式 */
+        .music-settings-container {
+            padding: 5px 0;
+        }
+
+        .volume-control {
+            margin-bottom: 15px;
+        }
+
+        .volume-control label {
+            display: block;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .volume-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        #volumeValue {
+            color: white;
+            font-weight: bold;
+            min-width: 35px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .music-selection label {
+            display: block;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .music-options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .music-option-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .music-option-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .music-option-card.selected {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(255, 165, 0, 0.3));
+            border-color: #ff6b6b;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        /* 关闭音乐按钮特殊样式 */
+        .music-option-card[data-music="none"] {
+            background: linear-gradient(45deg, rgba(255, 193, 7, 0.8), rgba(255, 235, 59, 0.8));
+            border: 2px solid rgba(255, 193, 7, 0.9);
+            color: white;
+        }
+
+        .music-option-card[data-music="none"]:hover {
+            background: linear-gradient(45deg, rgba(255, 193, 7, 0.9), rgba(255, 235, 59, 0.9));
+            border-color: rgba(255, 193, 7, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+        }
+
+        .music-option-card[data-music="none"].selected {
+            background: linear-gradient(45deg, rgba(255, 193, 7, 1), rgba(255, 235, 59, 1));
+            border-color: #ffc107;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.5);
+        }
+
+        .music-option-card[data-music="none"] .music-name {
+            color: white;
+            font-weight: 900;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-option-card[data-music="none"] .music-status {
+            color: white;
+            font-size: 16px;
+            font-weight: 900;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-name {
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .music-status {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            color: #4CAF50;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* 音乐分割线样式 */
+        .music-divider {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 8px 0 5px 0;
+            margin: 5px 0;
+            position: relative;
+        }
+
+        .music-divider span {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .music-menu-divider {
+            padding: 10px 15px;
+            text-align: center;
+            color: #ffa500;
+            font-size: 12px;
+            font-weight: bold;
+            border-top: 1px solid rgba(255, 165, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 165, 0, 0.3);
+            margin: 5px 0;
+            background: rgba(255, 165, 0, 0.1);
         }
 
         @keyframes fadeIn {
@@ -1194,6 +1528,50 @@
                 <div class="game-header">
                     <div class="score-display"></div>
                     <div class="header-buttons">
+                        <div class="music-menu" id="musicMenu">
+                            <div class="music-menu-header">背景音乐</div>
+                            <div class="music-option" onclick="selectMusic('none')">
+                                <span>关闭音乐</span>
+                                <span class="music-status" id="status-none">✓</span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('festive')">
+                                <span>喜庆日</span>
+                                <span class="music-status" id="status-festive"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('zen')">
+                                <span>禅境幽</span>
+                                <span class="music-status" id="status-zen"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('guzheng')">
+                                <span>筝放松</span>
+                                <span class="music-status" id="status-guzheng"></span>
+                            </div>
+                            <div class="music-menu-divider">怀旧音乐</div>
+                            <div class="music-option" onclick="selectMusic('qibao')">
+                                <span>七宝奇谋</span>
+                                <span class="music-status" id="status-qibao"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('xianjian1')">
+                                <span>仙剑1</span>
+                                <span class="music-status" id="status-xianjian1"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('xianjian2')">
+                                <span>仙剑2</span>
+                                <span class="music-status" id="status-xianjian2"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('yingzi')">
+                                <span>影子传说</span>
+                                <span class="music-status" id="status-yingzi"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('mario')">
+                                <span>超级玛丽</span>
+                                <span class="music-status" id="status-mario"></span>
+                            </div>
+                            <div class="music-option" onclick="selectMusic('contra')">
+                                <span>魂斗罗</span>
+                                <span class="music-status" id="status-contra"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- 选择题界面 -->
@@ -1219,6 +1597,11 @@
                     <button class="answers-btn" onclick="showAnswersModal()">答题记录</button>
                     <button class="feedback-btn" onclick="showFeedbackForm()">给作者反馈</button>
                     <button class="logout-btn" onclick="logout()">退出登录</button>
+                    <button class="music-btn" onclick="openMusicSettings()" title="音乐设置">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                        </svg>
+                    </button>
                 </div>
                 
                 <div id="feedback" class="feedback"></div>
@@ -2863,6 +3246,28 @@
                 }
             }
         });
+
+        // 音乐控制相关函数
+        function toggleMusicMenu() {
+            const menu = document.getElementById('musicMenu');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
+        }
+
+        // 点击页面其他地方关闭音乐菜单
+        document.addEventListener('click', function(event) {
+            const musicMenu = document.getElementById('musicMenu');
+            const musicBtn = document.querySelector('.music-btn');
+            
+            if (musicMenu && musicBtn && 
+                !musicMenu.contains(event.target) && 
+                !musicBtn.contains(event.target)) {
+                musicMenu.style.display = 'none';
+            }
+        });
     </script>
     
     <!-- 反馈表单弹窗 -->
@@ -2910,6 +3315,85 @@
             </div>
             <div class="modal-footer">
                 <button class="modal-btn cancel-btn" onclick="closeAnswersModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音乐设置弹窗 -->
+    <div id="musicSettingsModal" class="custom-modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>音乐设置</h3>
+            </div>
+            <div class="modal-body">
+                <div class="music-settings-container">
+                    <!-- 音量控制 -->
+                    <div class="volume-control">
+                        <label for="volumeSlider">音量控制</label>
+                        <div class="volume-slider-container">
+                            <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider">
+                            <span id="volumeValue">50%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 音乐选择 -->
+                    <div class="music-selection">
+                        <label>选择背景音乐</label>
+                        <div class="music-options-grid">
+                            <div class="music-option-card" data-music="none">
+                                <div class="music-name">关闭音乐</div>
+                                <div class="music-status">✓</div>
+                            </div>
+                            <!-- 中文背景音乐 -->
+                            <div class="music-option-card" data-music="festive">
+                                <div class="music-name">喜庆日</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="zen">
+                                <div class="music-name">禅境幽</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="guzheng">
+                                <div class="music-name">筝放松</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            
+                            <!-- 分割线 -->
+                            <div class="music-divider">
+                        <span>怀旧音乐</span>
+                    </div>
+                    
+                    <!-- 怀旧音乐 -->
+                            <div class="music-option-card" data-music="qibao">
+                                <div class="music-name">七宝奇谋</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="xianjian1">
+                                <div class="music-name">仙剑1</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="xianjian2">
+                                <div class="music-name">仙剑2</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="yingzi">
+                                <div class="music-name">影子传说</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="mario">
+                                <div class="music-name">超级玛丽</div>
+                                <div class="music-status">○</div>
+                            </div>
+                            <div class="music-option-card" data-music="contra">
+                                <div class="music-name">魂斗罗</div>
+                                <div class="music-status">○</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="closeMusicSettings()">完成</button>
             </div>
         </div>
     </div>

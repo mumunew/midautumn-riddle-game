@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐测试页面</title>
+</head>
+<body>
+    <h1>音乐播放测试</h1>
+    <button onclick="testMario()">测试马里奥音乐</button>
+    <button onclick="testPokemon()">测试口袋妖怪音乐</button>
+    <button onclick="testZelda()">测试塞尔达音乐</button>
+    <div id="status"></div>
+    
+    <script>
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML += '<p>' + message + '</p>';
+            console.log(message);
+        }
+        
+        function testMario() {
+            updateStatus('开始测试马里奥音乐...');
+            const audio = new Audio('./music/mario.wav');
+            audio.volume = 0.3;
+            
+            audio.addEventListener('loadstart', () => updateStatus('开始加载音频文件'));
+            audio.addEventListener('canplay', () => updateStatus('音频文件可以播放'));
+            audio.addEventListener('error', (e) => updateStatus('音频加载错误: ' + e.message));
+            
+            audio.play().then(() => {
+                updateStatus('马里奥音乐播放成功！');
+            }).catch(error => {
+                updateStatus('播放失败: ' + error.message);
+            });
+        }
+        
+        function testPokemon() {
+            updateStatus('开始测试口袋妖怪音乐...');
+            const audio = new Audio('./music/pokemon.wav');
+            audio.volume = 0.3;
+            
+            audio.addEventListener('loadstart', () => updateStatus('开始加载音频文件'));
+            audio.addEventListener('canplay', () => updateStatus('音频文件可以播放'));
+            audio.addEventListener('error', (e) => updateStatus('音频加载错误: ' + e.message));
+            
+            audio.play().then(() => {
+                updateStatus('口袋妖怪音乐播放成功！');
+            }).catch(error => {
+                updateStatus('播放失败: ' + error.message);
+            });
+        }
+        
+        function testZelda() {
+            updateStatus('开始测试塞尔达音乐...');
+            const audio = new Audio('./music/zelda.wav');
+            audio.volume = 0.3;
+            
+            audio.addEventListener('loadstart', () => updateStatus('开始加载音频文件'));
+            audio.addEventListener('canplay', () => updateStatus('音频文件可以播放'));
+            audio.addEventListener('error', (e) => updateStatus('音频加载错误: ' + e.message));
+            
+            audio.play().then(() => {
+                updateStatus('塞尔达音乐播放成功！');
+            }).catch(error => {
+                updateStatus('播放失败: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>
