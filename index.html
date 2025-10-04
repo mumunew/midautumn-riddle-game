@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中秋灯谜会</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="riddles.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .couplet-left {
+            position: absolute;
+            top: 170px;
+            left: 125px;
+        }
+
+        .couplet-right {
+            position: absolute;
+            top: 170px;
+            right: 125px;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+            background: linear-gradient(135deg, #ff9a56, #ffad56, #ffc93c, #ff6b9d, #c44569);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #d32f2f;
+            font-size: 3.2rem;
+            margin-bottom: 35px;
+            text-shadow: 3px 3px 8px rgba(0,0,0,0.2);
+            font-weight: 700;
+            letter-spacing: 2px;
+            line-height: 1.2;
+            animation: fadeInUp 1s ease-out, float 3s ease-in-out infinite 2s;
+        }
+
+        /* 登录界面样式 */
+        .login-screen {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        /* 标签页样式 */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            background: rgba(245, 245, 245, 0.8);
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .tab-btn:hover::before {
+            left: 100%;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #d32f2f, #ff6b6b, #ff8a80);
+            color: white;
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(224, 224, 224, 0.9);
+            transform: translateY(-1px);
+        }
+
+        /* 表单样式 */
+        .auth-form h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid #ffd93d;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .input-group input:focus {
+            border-color: #d32f2f;
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #d32f2f, #ff6b6b, #ff8a80);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: auto;
+            margin: 5px;
+            min-width: 90px;
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(211, 47, 47, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3);
+        }
+
+        .error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* 复选框样式 */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            user-select: none;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d32f2f;
+            border-radius: 3px;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+            background-color: #d32f2f;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+             content: '';
+             position: absolute;
+             left: 5px;
+             top: 2px;
+             width: 4px;
+             height: 8px;
+             border: solid white;
+             border-width: 0 2px 2px 0;
+             transform: rotate(45deg);
+         }
+
+         /* 游戏头部样式 */
+         .game-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 20px;
+             padding: 10px 0;
+         }
+
+         .score-display {
+             font-size: 18px;
+             font-weight: bold;
+             color: #d32f2f;
+         }
+
+         .logout-btn {
+             background: linear-gradient(45deg, #666, #888);
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 6px;
+             font-size: 14px;
+             cursor: pointer;
+             transition: all 0.2s;
+         }
+
+         .logout-btn:hover {
+             background: linear-gradient(45deg, #555, #777);
+             transform: translateY(-1px);
+         }
+
+         /* 头部按钮组样式 */
+         .header-buttons {
+             display: flex;
+             gap: 10px;
+             align-items: center;
+         }
+
+         .feedback-btn {
+             background: linear-gradient(45deg, #4CAF50, #66BB6A);
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 6px;
+             font-size: 14px;
+             cursor: pointer;
+             transition: all 0.2s;
+         }
+
+         .feedback-btn:hover {
+             background: linear-gradient(45deg, #45a049, #5cb85c);
+             transform: translateY(-1px);
+         }
+
+         .answers-btn {
+             background: linear-gradient(45deg, #2196F3, #42A5F5);
+             color: white;
+             border: none;
+             padding: 8px 16px;
+             border-radius: 6px;
+             font-size: 14px;
+             cursor: pointer;
+             transition: all 0.2s;
+         }
+
+         .answers-btn:hover {
+             background: linear-gradient(45deg, #1976D2, #1E88E5);
+             transform: translateY(-1px);
+         }
+
+        /* 游戏界面样式 */
+        .game-screen {
+            display: none;
+        }
+
+        .game-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: -170px 0 30px 0;
+            gap: 30px;
+        }
+
+        /* 对联样式 */
+        .couplet {
+            background: #d32f2f; /* 红色背景 */
+            border-radius: 15px;
+            padding: 20px 10px;
+            width: 75px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .couplet-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 1.5rem;
+            color: #ffeb3b; /* 黄色文字 */
+            font-weight: bold;
+            line-height: 2;
+        }
+
+        /* 灯笼样式 */
+        .lantern-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 10000;
+        }
+
+        .lantern {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 0 0 20px 0;
+            animation: float 4s ease-in-out infinite;
+            z-index: 10001;
+        }
+
+        .lantern-top-line {
+            width: 4px;
+            height: 50px;
+            background: linear-gradient(180deg, #d32f2f, #ff5722);
+            margin: 150px auto 0 auto;
+            border-radius: 2px;
+            position: relative;
+            z-index: 10002;
+        }
+
+        .lantern-top-decoration {
+            width: 150px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700, #ffeb3b, #ffc107, #ff9800);
+            border-radius: 20px;
+            margin: -10px auto -12px auto;
+            box-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 6px 20px rgba(255, 217, 61, 0.4), 
+                0 3px 10px rgba(0,0,0,0.3),
+                inset 0 2px 4px rgba(255,255,255,0.3),
+                inset 0 -2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            border: 2px solid #ffd700;
+            z-index: 10005;
+        }
+
+        .lantern-top-decoration::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 28px;
+            background: linear-gradient(135deg, #fff59d, #ffeb3b, #ffd54f);
+            border-radius: 14px;
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(255, 245, 157, 0.5);
+        }
+
+        .lantern-top-decoration::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 20px;
+            width: 40px;
+            height: 8px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.6), transparent);
+            border-radius: 4px;
+        }
+
+        .lantern-body {
+            width: 280px;
+            height: 280px;
+            background: linear-gradient(135deg, #e53935, #d32f2f, #c62828);
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 
+                0 0 40px rgba(229, 57, 53, 0.6),
+                0 15px 35px rgba(0,0,0,0.3),
+                inset 0 -20px 40px rgba(0,0,0,0.2),
+                inset 0 20px 40px rgba(255,255,255,0.1);
+            position: relative;
+            border: 3px solid #ffeb3b;
+            z-index: 10004;
+        }
+
+        .lantern-body::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px solid rgba(255, 235, 59, 0.3);
+            border-radius: 50%;
+        }
+
+        .lantern-body::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .riddle-text {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.6;
+            padding: 25px;
+            max-width: 220px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10005;
+            position: relative;
+        }
+
+        .riddle-hint {
+            color: #ffeb3b;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0; /* 移除上边距 */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            z-index: 10005;
+            position: relative;
+        }
+
+        .lantern-bottom-decoration {
+            width: 150px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700, #ffeb3b, #ffc107, #ff9800);
+            border-radius: 20px;
+            margin: -12px auto -10px auto;
+            box-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 6px 20px rgba(255, 217, 61, 0.4), 
+                0 3px 10px rgba(0,0,0,0.3),
+                inset 0 2px 4px rgba(255,255,255,0.3),
+                inset 0 -2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            border: 2px solid #ffd700;
+            z-index: 10005;
+        }
+
+        .lantern-bottom-decoration::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 28px;
+            background: linear-gradient(135deg, #fff59d, #ffeb3b, #ffd54f);
+            border-radius: 14px;
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(255, 245, 157, 0.5);
+        }
+
+        .lantern-bottom-decoration::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 20px;
+            width: 40px;
+            height: 8px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.6), transparent);
+            border-radius: 4px;
+        }
+
+        .lantern-bottom-line {
+            width: 36px;
+            height: 60px;
+            background: linear-gradient(180deg, #d32f2f, #ff5722, #d32f2f);
+            margin: 0 auto;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(211, 47, 47, 0.4);
+            position: relative;
+            z-index: 10002;
+        }
+
+        /* 答题区域 */
+        .answer-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 30px;
+            position: relative;
+            top: 50px;
+            margin: 130px 0 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .answer-input {
+            width: 320px;
+            padding: 18px 20px;
+            border: 2px solid #ffd93d;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 217, 61, 0.2);
+        }
+
+        .answer-input:focus {
+            border-color: #d32f2f;
+            box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+
+        /* 排行榜样式 */
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 30px;
+            margin: 90px 0 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .leaderboard h3 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 5px 0;
+            background: rgba(255, 235, 59, 0.2);
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .leaderboard-item.current-user {
+            background: rgba(211, 47, 47, 0.2);
+            border: 2px solid #d32f2f;
+            font-weight: bold;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #d32f2f;
+            min-width: 30px;
+        }
+
+        .username {
+            flex: 1;
+            text-align: left;
+            margin-left: 15px;
+        }
+
+        .score {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        /* 撒花动画 */
+        .fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        /* 花瓣样式 */
+        .confetti {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* 花瓣形状1 - 椭圆花瓣 */
+        .petal-1 {
+            width: 12px;
+            height: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border-radius: 50% 50% 50% 0;
+            transform-origin: bottom center;
+        }
+
+        /* 花瓣形状2 - 心形花瓣 */
+        .petal-2 {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(45deg, #ffd93d, #ffed4e);
+            border-radius: 50% 50% 0 50%;
+            transform-origin: center;
+        }
+
+        /* 花瓣形状3 - 圆形花瓣 */
+        .petal-3 {
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(45deg, #4ecdc4, #6ee5db);
+            border-radius: 50%;
+            transform-origin: center;
+        }
+
+        /* 花瓣形状4 - 水滴形花瓣 */
+        .petal-4 {
+            width: 10px;
+            height: 18px;
+            background: linear-gradient(45deg, #96ceb4, #b8e6d3);
+            border-radius: 50% 0 50% 50%;
+            transform-origin: bottom center;
+        }
+
+        /* 花瓣形状5 - 菱形花瓣 */
+        .petal-5 {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(45deg, #ffeaa7, #fff3c4);
+            border-radius: 0;
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+
+        /* 花瓣形状6 - 星形花瓣 */
+        .petal-6 {
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(45deg, #dda0dd, #e6b3e6);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            transform-origin: center;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .couplet {
+                width: 100%;
+                max-width: 300px;
+                margin: 10px 0;
+            }
+
+            .couplet-text {
+                writing-mode: horizontal-tb;
+                text-orientation: mixed;
+            }
+
+            .lantern {
+                width: 250px;
+                height: 350px;
+            }
+
+            .lantern-body {
+                width: 200px;
+                height: 200px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 自定义弹窗样式 */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 20000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .custom-modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: white;
+            font-size: 1.4rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-body {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .modal-body p {
+            margin: 0;
+            color: white;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-footer {
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-btn {
+            background: white;
+            color: #ff6b6b;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-btn.cancel-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .modal-btn.cancel-btn:hover {
+            background: white;
+            color: #ff6b6b;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateY(-50px) scale(0.9);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>中秋灯谜会</h1>
+        
+        <!-- 登录界面 -->
+        <div id="loginScreen" class="login-screen">
+            <div id="authTabs" class="auth-tabs">
+                <button id="loginTab" class="tab-btn active" onclick="switchTab('login')">登录</button>
+                <button id="registerTab" class="tab-btn" onclick="switchTab('register')">注册</button>
+            </div>
+            
+            <!-- 登录表单 -->
+            <div id="loginForm" class="auth-form">
+                <h2>用户登录</h2>
+                <div class="input-group">
+                    <input type="text" id="loginUsername" placeholder="请输入用户名" maxlength="20">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="请输入密码" maxlength="50">
+                </div>
+                <div class="input-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberPassword">
+                        <span class="checkmark"></span>
+                        记住密码
+                    </label>
+                </div>
+                <button class="btn" onclick="login()">登录游戏</button>
+                <div id="loginError" class="error-message"></div>
+            </div>
+            
+            <!-- 注册表单 -->
+            <div id="registerForm" class="auth-form" style="display: none;">
+                <h2>用户注册</h2>
+                <div class="input-group">
+                    <input type="text" id="registerUsername" placeholder="请输入用户名" maxlength="20">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="registerPassword" placeholder="请输入密码" maxlength="50">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirmPassword" placeholder="确认密码" maxlength="50">
+                </div>
+                <button class="btn" onclick="register()">注册账号</button>
+                <div id="registerError" class="error-message"></div>
+            </div>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div id="gameScreen" class="game-screen">
+            <div class="game-area">
+                <!-- 左对联 -->
+            <div class="couplet couplet-left">
+                <div class="couplet-text">猜谜庆中秋</div>
+            </div>
+
+                <!-- 灯笼 -->
+                <div class="lantern-container">
+                    <div class="lantern">
+                        <div class="lantern-top-line"></div>
+                        <div class="lantern-top-decoration"></div>
+                        <div class="lantern-body">
+                            <div id="riddleText" class="riddle-text">点击开始游戏</div>
+                            <div id="riddleHint" class="riddle-hint">提示：</div>
+                        </div>
+                        <div class="lantern-bottom-decoration"></div>
+                        <div class="lantern-bottom-line"></div>
+                    </div>
+                </div>
+
+                <!-- 右对联 -->
+                <div class="couplet couplet-right">
+                    <div class="couplet-text">解谜贺国庆</div>
+                </div>
+            </div>
+
+            <!-- 答题区域 -->
+            <div class="answer-area">
+                <div class="game-header">
+                    <div class="score-display"></div>
+                    <div class="header-buttons">
+                        <button class="answers-btn" onclick="showAnswersModal()">答题记录</button>
+                        <button class="feedback-btn" onclick="showFeedbackForm()">给作者反馈</button>
+                        <button class="logout-btn" onclick="logout()">退出登录</button>
+                    </div>
+                </div>
+                <input type="text" id="answerInput" class="answer-input" placeholder="请输入答案" maxlength="10">
+                <div class="button-group">
+                    <button class="btn" onclick="submitAnswer()">提交答案</button>
+                    <button class="btn secondary" onclick="showAnswer()">显示答案</button>
+                    <button class="btn secondary" onclick="skipRiddle()">跳过</button>
+                </div>
+                
+                <div id="feedback" class="feedback"></div>
+            </div>
+
+            <!-- 排行榜 -->
+            <div class="leaderboard">
+                <h3>排行榜</h3>
+                <div id="leaderboardList" class="leaderboard-list">
+                    <!-- 排行榜内容将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 烟花容器 -->
+        <div id="fireworksContainer" class="fireworks"></div>
+    </div>
+
+    <!-- 自定义弹窗 -->
+    <div id="customModal" class="custom-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">提示</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">这是一个提示消息</p>
+            </div>
+            <div class="modal-footer">
+                <button id="modalConfirm" class="modal-btn">确定</button>
+                <button id="modalCancel" class="modal-btn cancel-btn" style="display: none;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置 Supabase（通过API安全获取配置）
+        let SUPABASE_CONFIG = null;
+        let supabaseClient = null;
+
+        // 异步获取Supabase配置
+        async function initializeSupabase() {
+            // 检查是否为本地开发环境
+            const isLocalDev = window.location.hostname === 'localhost' || 
+                              window.location.hostname === '127.0.0.1' || 
+                              window.location.protocol === 'file:';
+            
+            if (isLocalDev) {
+                // 本地开发环境直接使用配置
+                console.log('检测到本地开发环境，使用本地配置');
+                SUPABASE_CONFIG = {
+                    URL: 'https://emsmsbtmwumlljjvlieh.supabase.co',
+                    ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtc21zYnRtd3VtbGxqanZsaWVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzOTU4NTAsImV4cCI6MjA3NDk3MTg1MH0.x2Y1CG0jbi4NsYhWQ-GtwNIYvLNCLAJUsUdf7en7-M8'
+                };
+                supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+                console.log('Supabase 客户端初始化成功（本地环境）');
+                await testSupabaseConnection();
+                return;
+            }
+            
+            // 生产环境通过API获取配置
+            try {
+                console.log('生产环境，通过API获取配置');
+                const response = await fetch('/api/config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Supabase config');
+                }
+                
+                const config = await response.json();
+                SUPABASE_CONFIG = {
+                    URL: config.url,
+                    ANON_KEY: config.anonKey
+                };
+
+                // 初始化 Supabase 客户端
+                if (SUPABASE_CONFIG.URL && SUPABASE_CONFIG.ANON_KEY) {
+                    supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+                    console.log('Supabase 客户端初始化成功（生产环境）');
+                    
+                    // 测试连接
+                    await testSupabaseConnection();
+                } else {
+                    console.warn('Supabase 配置不完整');
+                }
+            } catch (error) {
+                console.error('初始化 Supabase 失败:', error);
+                // 如果API失败，显示错误信息
+                showNetworkError('无法获取数据库配置，请检查网络连接');
+            }
+        }
+
+        // 页面加载完成后初始化Supabase
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSupabase();
+        });
+
+        // 测试Supabase连接
+        async function testSupabaseConnection() {
+            if (!supabaseClient) return;
+            
+            try {
+                console.log('开始测试Supabase连接...');
+                
+                // 首先测试基本的API连接
+                const response = await fetch(`${SUPABASE_CONFIG.URL}/rest/v1/`, {
+                    method: 'HEAD',
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.ANON_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API连接失败: ${response.status} ${response.statusText}`);
+                }
+                
+                console.log('API连接成功，开始测试数据库查询...');
+                
+                // 尝试进行一个简单的查询来测试连接
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('数据库查询失败:', error);
+                    
+                    // 如果是表不存在的错误，尝试创建表
+                    if (error.code === 'PGRST116' || error.message.includes('relation "public.users" does not exist')) {
+                        console.log('检测到users表不存在，尝试创建...');
+                        await createUsersTable();
+                        return;
+                    }
+                    
+                    showNetworkError('数据库连接失败: ' + error.message);
+                } else {
+                    console.log('Supabase连接测试成功');
+                }
+            } catch (error) {
+                console.error('网络连接错误:', error);
+                showNetworkError('网络连接失败: ' + error.message);
+            }
+        }
+
+        // 创建users表
+        async function createUsersTable() {
+            try {
+                console.log('正在创建users表...');
+                
+                // 使用SQL创建表
+                const { data, error } = await supabaseClient.rpc('create_users_table', {});
+                
+                if (error) {
+                    console.error('创建表失败:', error);
+                    showNetworkError('数据库表创建失败，请手动创建users表');
+                } else {
+                    console.log('users表创建成功');
+                    showSuccessMessage('数据库表创建成功！');
+                }
+            } catch (error) {
+                console.error('创建表时发生错误:', error);
+                showNetworkError('无法创建数据库表，请检查数据库权限');
+            }
+        }
+
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 300px;
+                font-size: 14px;
+            `;
+            successDiv.innerHTML = `
+                <strong>✅ 成功</strong><br>
+                ${message}
+            `;
+            document.body.appendChild(successDiv);
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+
+        // 显示网络错误提示
+        function showNetworkError(message = '无法连接到数据库服务器') {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #ff4444;
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 300px;
+                font-size: 14px;
+            `;
+            errorDiv.innerHTML = `
+                <strong>⚠️ 网络连接问题</strong><br>
+                ${message}<br>
+                <small>游戏仍可正常进行，但无法保存分数。</small><br>
+                <button onclick="this.parentNode.parentNode.removeChild(this.parentNode)" 
+                        style="margin-top: 10px; padding: 5px 10px; background: rgba(255,255,255,0.2); 
+                               border: none; color: white; border-radius: 4px; cursor: pointer;">
+                    关闭
+                </button>
+            `;
+            document.body.appendChild(errorDiv);
+            
+            // 10秒后自动隐藏
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 10000);
+        }
+
+        // 全局变量
+        let currentUser = null;
+        let currentRiddleIndex = 0;
+        let userScore = 0;
+        let hintUsed = false; // 是否使用了提示
+        let leaderboardSubscription = null;
+        let randomRiddleIndices = []; // 随机谜题索引数组
+        let answeredRiddles = new Set(); // 已答谜题索引集合
+        
+        // 同义词映射表，用于处理语义相似的答案
+        const synonymMap = {
+            '羊': ['绵羊', '山羊', '羔羊'],
+            '绵羊': ['羊', '山羊', '羔羊'],
+            '山羊': ['羊', '绵羊', '羔羊'],
+            '羔羊': ['羊', '绵羊', '山羊']
+        };
+
+
+
+        // 自定义弹窗函数
+        function showCustomAlert(title, message, callback) {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const confirmBtn = document.getElementById('modalConfirm');
+            const cancelBtn = document.getElementById('modalCancel');
+            
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.add('show');
+            
+            // 隐藏取消按钮
+            cancelBtn.style.display = 'none';
+            
+            // 移除答案输入框的焦点，防止回车键重复提交
+            document.getElementById('answerInput').blur();
+            
+            // 让确认按钮获得焦点，这样回车键会触发确认按钮
+            setTimeout(() => {
+                confirmBtn.focus();
+            }, 100);
+            
+            // 确定按钮事件
+            confirmBtn.onclick = function() {
+                modal.classList.remove('show');
+                if (callback) callback(true);
+            };
+            
+            // 点击背景关闭
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                    if (callback) callback(false);
+                }
+            };
+            
+            // 回车键关闭功能
+            const handleKeyPress = function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    modal.classList.remove('show');
+                    if (callback) callback(true);
+                    document.removeEventListener('keydown', handleKeyPress);
+                }
+            };
+            
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function showCustomConfirm(title, message, callback) {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const confirmBtn = document.getElementById('modalConfirm');
+            const cancelBtn = document.getElementById('modalCancel');
+            
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.add('show');
+            
+            // 显示取消按钮
+            cancelBtn.style.display = 'inline-block';
+            
+            // 确定按钮事件
+            confirmBtn.onclick = function() {
+                modal.classList.remove('show');
+                if (callback) callback(true);
+            };
+            
+            // 取消按钮事件
+            cancelBtn.onclick = function() {
+                modal.classList.remove('show');
+                if (callback) callback(false);
+            };
+            
+            // 点击背景关闭
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                    if (callback) callback(false);
+                }
+            };
+            
+            // 回车键关闭功能（选择确定）
+            const handleKeyPress = function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    // 只有当焦点不在答案输入框中时才处理回车键
+                    if (document.activeElement !== document.getElementById('answerInput')) {
+                        modal.classList.remove('show');
+                        if (callback) callback(true);
+                        document.removeEventListener('keydown', handleKeyPress);
+                    }
+                }
+            };
+            
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // 页面加载完成后的初始化
+        window.addEventListener('load', function() {
+            // 检查是否有保存的登录信息
+            checkSavedLogin();
+        });
+
+        // 检查保存的登录信息
+        function checkSavedLogin() {
+            const savedLogin = localStorage.getItem('riddle_game_login');
+            if (savedLogin) {
+                try {
+                    const loginInfo = JSON.parse(savedLogin);
+                    // 检查是否在7天内
+                    const daysPassed = (Date.now() - loginInfo.timestamp) / (1000 * 60 * 60 * 24);
+                    if (daysPassed <= 7) {
+                        // 自动填充登录信息
+                        document.getElementById('loginUsername').value = loginInfo.username;
+                        document.getElementById('loginPassword').value = loginInfo.password;
+                        document.getElementById('rememberPassword').checked = true;
+                        
+                        // 自动登录
+                        autoLogin(loginInfo);
+                    } else {
+                        // 超过7天，清除保存的信息
+                        localStorage.removeItem('riddle_game_login');
+                    }
+                } catch (error) {
+                    console.error('解析保存的登录信息失败:', error);
+                    localStorage.removeItem('riddle_game_login');
+                }
+            }
+        }
+
+        // 自动登录功能
+        async function autoLogin(loginInfo) {
+            if (!supabaseClient) {
+                console.error('数据库未配置，无法自动登录');
+                return;
+            }
+
+            try {
+                // 验证用户名和密码
+                const { data: users, error: checkError } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('username', loginInfo.username)
+                    .eq('password', loginInfo.password);
+
+                if (checkError) {
+                    console.error('自动登录验证失败:', checkError);
+                    return;
+                }
+
+                if (!users || users.length === 0) {
+                    console.error('自动登录失败：用户信息已过期');
+                    // 清除过期的登录信息
+                    localStorage.removeItem('riddle_game_login');
+                    return;
+                }
+
+                // 自动登录成功
+                currentUser = users[0];
+                userScore = currentUser.score || 0;
+                
+                // 直接开始游戏
+                startGame();
+
+            } catch (error) {
+                console.error('自动登录错误:', error);
+            }
+        }
+
+        // 切换标签页
+        function switchTab(tab) {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (tab === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                loginTab.classList.remove('active');
+                registerTab.classList.add('active');
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+
+        // 注册功能
+        async function register() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const errorDiv = document.getElementById('registerError');
+            
+            // 基本验证
+            if (!username) {
+                errorDiv.textContent = '请输入用户名';
+                return;
+            }
+
+            if (username.length < 2) {
+                errorDiv.textContent = '用户名至少需要2个字符';
+                return;
+            }
+
+            if (!password) {
+                errorDiv.textContent = '请输入密码';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = '密码至少需要6个字符';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = '两次输入的密码不一致';
+                return;
+            }
+
+            if (!supabaseClient) {
+                errorDiv.textContent = '数据库未配置，无法注册';
+                return;
+            }
+
+            try {
+                // 检查用户名是否已存在
+                const { data: existingUsers, error: checkError } = await supabaseClient
+                    .from('users')
+                    .select('username')
+                    .eq('username', username);
+
+                if (checkError) {
+                    console.error('检查用户名失败:', checkError);
+                    errorDiv.textContent = '注册失败，请重试';
+                    return;
+                }
+
+                if (existingUsers && existingUsers.length > 0) {
+                    errorDiv.textContent = '用户名已存在，请选择其他用户名';
+                    return;
+                }
+
+                // 创建新用户
+                const { data: newUser, error: insertError } = await supabaseClient
+                    .from('users')
+                    .insert([
+                        {
+                            username: username,
+                            password: password,
+                            score: 0,
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }
+                    ])
+                    .select();
+
+                if (insertError) {
+                    console.error('创建用户失败:', insertError);
+                    errorDiv.textContent = '注册失败，请重试';
+                    return;
+                }
+
+                // 注册成功
+                errorDiv.textContent = '';
+                showCustomAlert('注册成功', '账号创建成功！请登录开始游戏。', function() {
+                    // 切换到登录页面
+                    switchTab('login');
+                    // 清空注册表单
+                    document.getElementById('registerUsername').value = '';
+                    document.getElementById('registerPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                });
+
+            } catch (error) {
+                console.error('注册错误:', error);
+                errorDiv.textContent = '网络错误，请检查网络连接';
+            }
+        }
+
+        // 登录功能
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+            
+            // 基本验证
+            if (!username) {
+                errorDiv.textContent = '请输入用户名';
+                return;
+            }
+
+            if (!password) {
+                errorDiv.textContent = '请输入密码';
+                return;
+            }
+
+            if (username.length < 2) {
+                errorDiv.textContent = '用户名至少需要2个字符';
+                return;
+            }
+
+            if (!supabaseClient) {
+                errorDiv.textContent = '数据库未配置，无法登录';
+                return;
+            }
+
+            try {
+                // 验证用户名和密码
+                const { data: users, error: checkError } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('password', password);
+
+                if (checkError) {
+                    console.error('验证用户失败:', checkError);
+                    errorDiv.textContent = '登录失败，请重试';
+                    return;
+                }
+
+                if (!users || users.length === 0) {
+                    errorDiv.textContent = '用户名或密码错误';
+                    return;
+                }
+
+                // 登录成功
+                currentUser = users[0];
+                userScore = currentUser.score || 0;
+                errorDiv.textContent = '';
+                
+                // 检查是否勾选了记住密码
+                const rememberPassword = document.getElementById('rememberPassword').checked;
+                if (rememberPassword) {
+                    // 保存登录信息到本地存储
+                    const loginInfo = {
+                        username: username,
+                        password: password,
+                        userId: currentUser.id,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('riddle_game_login', JSON.stringify(loginInfo));
+                } else {
+                    // 如果没有勾选记住密码，清除之前保存的信息
+                    localStorage.removeItem('riddle_game_login');
+                }
+                
+                startGame();
+
+            } catch (error) {
+                console.error('登录错误:', error);
+                errorDiv.textContent = '网络错误，请检查网络连接';
+            }
+        }
+
+        // 开始游戏
+        function startGame() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            // 更新分数显示
+            updateScoreDisplay();
+            
+            // 显示第一题
+            showCurrentRiddle();
+            
+            // 订阅排行榜更新
+            subscribeToLeaderboard();
+            
+            // 初始加载排行榜
+            loadLeaderboard();
+        }
+
+        // 更新分数显示
+        function updateScoreDisplay() {
+            const scoreElements = document.querySelectorAll('.score-display');
+            scoreElements.forEach(element => {
+                element.textContent = `${currentUser.username} | 当前分数: ${userScore}`;
+            });
+        }
+
+        // 生成随机谜题索引数组
+        function generateRandomRiddleIndices() {
+            // 创建0到riddles.length-1的数组
+            const indices = Array.from({length: riddles.length}, (_, i) => i);
+            
+            // Fisher-Yates 洗牌算法
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            
+            return indices;
+        }
+
+        // 获取下一个随机谜题索引
+        function getNextRandomRiddleIndex() {
+            // 如果随机索引数组为空或已用完，重新生成
+            if (randomRiddleIndices.length === 0) {
+                randomRiddleIndices = generateRandomRiddleIndices();
+            }
+            
+            // 过滤掉已答的谜题
+            const availableIndices = randomRiddleIndices.filter(index => !answeredRiddles.has(index));
+            
+            // 如果没有可用的谜题，返回-1表示游戏结束
+            if (availableIndices.length === 0) {
+                return -1;
+            }
+            
+            // 返回第一个可用的谜题索引
+            return availableIndices[0];
+        }
+
+        // 显示当前谜题
+        function showCurrentRiddle() {
+            // 获取下一个随机谜题索引
+            const nextIndex = getNextRandomRiddleIndex();
+            
+            if (nextIndex === -1) {
+                // 所有题目完成
+                document.getElementById('riddleText').textContent = '恭喜完成所有题目！';
+                document.getElementById('riddleHint').textContent = '游戏结束';
+                return;
+            }
+
+            // 更新当前谜题索引
+            currentRiddleIndex = nextIndex;
+            const currentRiddle = riddles[currentRiddleIndex];
+            
+            document.getElementById('riddleText').textContent = currentRiddle.riddle; // 使用 'riddle' 字段
+            document.getElementById('riddleHint').textContent = `提示：${currentRiddle.hint || ''}`; // 显示 hint
+            document.getElementById('answerInput').value = '';
+            document.getElementById('answerInput').focus();
+        }
+
+        // 提交答案
+        async function submitAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.trim();
+            
+            if (!userAnswer) {
+                showCustomAlert('提示', '请输入答案');
+                return;
+            }
+
+            if (currentRiddleIndex >= riddles.length) {
+                showCustomAlert('提示', '游戏已结束');
+                return;
+            }
+
+            const currentRiddle = riddles[currentRiddleIndex];
+            
+            // 支持多种匹配方式：完全匹配、包含匹配、同义词匹配
+            const isAnswerCorrect = userAnswer === currentRiddle.answer ||
+                                  currentRiddle.answer.includes(userAnswer) ||
+                                  userAnswer.includes(currentRiddle.answer) ||
+                                  // 同义词匹配：检查用户答案是否是正确答案的同义词
+                                  (synonymMap[currentRiddle.answer] && synonymMap[currentRiddle.answer].includes(userAnswer)) ||
+                                  // 同义词匹配：检查正确答案是否是用户答案的同义词
+                                  (synonymMap[userAnswer] && synonymMap[userAnswer].includes(currentRiddle.answer));
+            
+            if (isAnswerCorrect) {
+                // 答对了，加10分
+                userScore += 10;
+                await updateUserScore();
+                await recordUserAnswer(currentRiddleIndex, userAnswer, true);
+                showFireworks();
+                showCustomAlert('恭喜！', `答对了！获得10分！\n答案是：${currentRiddle.answer}`, function() {
+                    // 将当前谜题添加到已答谜题集合中
+                    answeredRiddles.add(currentRiddleIndex);
+                    currentRiddleIndex = getNextRandomRiddleIndex();
+                    showCurrentRiddle();
+                });
+            } else {
+                // 答错了
+                await recordUserAnswer(currentRiddleIndex, userAnswer, false);
+                showCustomAlert('很遗憾', `答错了！\n正确答案是：${currentRiddle.answer}`, function() {
+                    // 将当前谜题添加到已答谜题集合中
+                    answeredRiddles.add(currentRiddleIndex);
+                    currentRiddleIndex = getNextRandomRiddleIndex();
+                    showCurrentRiddle();
+                });
+            }
+        }
+
+        // 更新用户分数
+        async function updateUserScore() {
+            if (!supabaseClient || !currentUser) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({ 
+                        score: userScore,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentUser.id);
+
+                if (error) {
+                    console.error('更新分数失败:', error);
+                    // 如果更新失败，回滚本地分数
+                    userScore -= 10;
+                    updateScoreDisplay();
+                } else {
+                    console.log('分数更新成功:', userScore);
+                    updateScoreDisplay();
+                    // 立即刷新排行榜
+                    await loadLeaderboard();
+                }
+            } catch (error) {
+                console.error('更新分数错误:', error);
+                // 如果更新失败，回滚本地分数
+                userScore -= 10;
+                updateScoreDisplay();
+            }
+        }
+
+        // 记录用户答题记录
+        async function recordUserAnswer(riddleIndex, userAnswer, isCorrect) {
+            if (!supabaseClient || !currentUser) {
+                return;
+            }
+
+            try {
+                const score = isCorrect ? 10 : 0; // 答对得10分，答错得0分
+                const { error } = await supabaseClient
+                    .from('user_answers')
+                    .insert({
+                        use_id: currentUser.id,
+                        riddle_id: riddleIndex,
+                        user_answer: userAnswer,
+                        is_correct: isCorrect,
+                        score: score
+                    });
+
+                if (error) {
+                    console.error('记录答题失败:', error);
+                } else {
+                    console.log('答题记录成功:', { riddleIndex, userAnswer, isCorrect, score });
+                }
+            } catch (error) {
+                console.error('记录答题错误:', error);
+            }
+        }
+
+        // 订阅排行榜更新
+        function subscribeToLeaderboard() {
+            if (!supabaseClient) {
+                return;
+            }
+
+            leaderboardSubscription = supabaseClient
+                .channel('leaderboard')
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'users' }, 
+                    () => {
+                        loadLeaderboard();
+                    }
+                )
+                .subscribe();
+        }
+
+        // 加载排行榜
+        async function loadLeaderboard() {
+            if (!supabaseClient) {
+                return;
+            }
+
+            try {
+                const { data: users, error } = await supabaseClient
+                    .from('users')
+                    .select('username, score, updated_at')
+                    .order('score', { ascending: false })
+                    .order('updated_at', { ascending: true })
+                    .limit(10);
+
+                if (error) {
+                    console.error('加载排行榜失败:', error);
+                    return;
+                }
+
+                displayLeaderboard(users);
+            } catch (error) {
+                console.error('加载排行榜错误:', error);
+            }
+        }
+
+        // 显示排行榜
+        function displayLeaderboard(users) {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+
+            if (!users || users.length === 0) {
+                leaderboardList.innerHTML = '<div class="leaderboard-item">暂无排行数据</div>';
+                return;
+            }
+
+            users.forEach((user, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                
+                // 如果是当前用户，添加特殊样式
+                if (currentUser && user.username === currentUser.username) {
+                    item.classList.add('current-user');
+                }
+
+                item.innerHTML = `
+                    <span class="rank">${index + 1}</span>
+                    <span class="username">${user.username}</span>
+                    <span class="score">${user.score}分</span>
+                `;
+                
+                leaderboardList.appendChild(item);
+            });
+        }
+
+        // 撒花庆祝效果
+        function showFireworks() {
+            console.log('showFireworks 函数被调用了！');
+            const fireworksContainer = document.getElementById('fireworksContainer');
+            console.log('fireworksContainer:', fireworksContainer);
+            
+            if (!fireworksContainer) {
+                console.error('找不到 fireworksContainer 元素！');
+                return;
+            }
+            
+            // 清除之前的撒花效果
+            fireworksContainer.innerHTML = '';
+            
+            // 花瓣类型和对应的颜色
+            const petalTypes = [
+                { class: 'petal-1', colors: ['#ff6b6b', '#ff8e8e', '#ff5252'] },
+                { class: 'petal-2', colors: ['#ffd93d', '#ffed4e', '#ffc107'] },
+                { class: 'petal-3', colors: ['#4ecdc4', '#6ee5db', '#26c6da'] },
+                { class: 'petal-4', colors: ['#96ceb4', '#b8e6d3', '#66bb6a'] },
+                { class: 'petal-5', colors: ['#ffeaa7', '#fff3c4', '#ffeb3b'] },
+                { class: 'petal-6', colors: ['#dda0dd', '#e6b3e6', '#ba68c8'] }
+            ];
+            
+            console.log('开始创建花瓣粒子...');
+            
+            // 创建100个花瓣粒子
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                
+                // 随机选择花瓣类型
+                const petalType = petalTypes[Math.floor(Math.random() * petalTypes.length)];
+                confetti.className = `confetti ${petalType.class}`;
+                
+                // 随机选择该类型的颜色
+                const color = petalType.colors[Math.floor(Math.random() * petalType.colors.length)];
+                
+                // 为不同形状设置不同的渐变
+                if (petalType.class === 'petal-1') {
+                    confetti.style.background = `linear-gradient(45deg, ${color}, ${petalType.colors[1]})`;
+                } else if (petalType.class === 'petal-2') {
+                    confetti.style.background = `radial-gradient(circle, ${color}, ${petalType.colors[2]})`;
+                } else if (petalType.class === 'petal-6') {
+                    confetti.style.background = `conic-gradient(${color}, ${petalType.colors[1]}, ${color})`;
+                } else {
+                    confetti.style.background = `linear-gradient(135deg, ${color}, ${petalType.colors[1]})`;
+                }
+                
+                // 添加阴影效果
+                confetti.style.boxShadow = `0 2px 8px rgba(0,0,0,0.2), 0 0 15px ${color}40`;
+                
+                // 随机起始位置（屏幕顶部和两侧）
+                const startX = Math.random() * 110 - 5; // -5% 到 105%，让花瓣从边缘也能飞入
+                confetti.style.left = startX + '%';
+                confetti.style.top = '-30px';
+                
+                // 随机透明度
+                confetti.style.opacity = Math.random() * 0.4 + 0.6;
+                
+                // 添加到容器
+                fireworksContainer.appendChild(confetti);
+                console.log(`创建第 ${i + 1} 个花瓣: ${petalType.class}`);
+                
+                // 动画参数 - 更自然的花瓣飘落
+                 const swayAmplitude = Math.random() * 30 + 20; // 摆动幅度
+                 const swayFrequency = Math.random() * 0.05 + 0.03; // 摆动频率（进一步加快）
+                 const fallSpeed = Math.random() * 5 + 3; // 下落速度（进一步加快）
+                 const rotationSpeed = Math.random() * 8 - 4; // 旋转速度（进一步加快）
+                 const initialRotation = Math.random() * 360; // 初始旋转角度
+                
+                let x = startX;
+                let y = -30;
+                let rotation = initialRotation;
+                let opacity = parseFloat(confetti.style.opacity);
+                let time = 0;
+                
+                // 花瓣飘落动画
+                const animate = () => {
+                    time += 1;
+                    
+                    // 自然的摆动效果（正弦波）
+                    const sway = Math.sin(time * swayFrequency) * swayAmplitude;
+                    x = startX + sway * (y / window.innerHeight); // 随着下落增加摆动
+                    
+                    // 下落
+                    y += fallSpeed;
+                    
+                    // 旋转
+                    rotation += rotationSpeed;
+                    
+                    // 透明度渐变（加快消失以适应2秒时长）
+                     opacity -= 0.008;
+                    
+                    // 应用变换
+                    confetti.style.left = x + '%';
+                    confetti.style.top = y + 'px';
+                    confetti.style.transform = `rotate(${rotation}deg)`;
+                    confetti.style.opacity = Math.max(0, opacity);
+                    
+                    // 继续动画或移除元素
+                    if (y < window.innerHeight + 100 && opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        if (confetti.parentNode) {
+                            confetti.remove();
+                        }
+                    }
+                };
+                
+                // 随机延迟开始，创造更自然的效果（缩短到0.5秒内）
+                 const delay = Math.random() * 500;
+                 setTimeout(() => {
+                     requestAnimationFrame(animate);
+                 }, delay);
+            }
+            
+            console.log('花瓣撒花效果创建完成！');
+            
+            // 2秒后清理所有剩余的花瓣元素
+             setTimeout(() => {
+                 const remainingConfetti = fireworksContainer.querySelectorAll('.confetti');
+                 console.log(`清理剩余的 ${remainingConfetti.length} 个花瓣`);
+                 remainingConfetti.forEach(confetti => confetti.remove());
+             }, 2000);
+        }
+
+        // 显示答案（不获得分数）
+        async function showAnswer() {
+            if (currentRiddleIndex >= riddles.length) {
+                showCustomAlert('提示', '游戏已结束');
+                return;
+            }
+
+            const currentRiddle = riddles[currentRiddleIndex];
+            
+            showCustomAlert('答案', `正确答案是：${currentRiddle.answer}\n\n${currentRiddle.hint || ''}\n\n显示答案后不会获得分数，请继续下一题`, function() {
+                // 将当前谜题添加到已答谜题集合中
+                answeredRiddles.add(currentRiddleIndex);
+                currentRiddleIndex = getNextRandomRiddleIndex();
+                showCurrentRiddle();
+            });
+        }
+
+        // 跳过当前题目
+        function skipRiddle() {
+            if (currentRiddleIndex >= riddles.length) {
+                showCustomAlert('提示', '游戏已结束');
+                return;
+            }
+
+            const currentRiddle = riddles[currentRiddleIndex];
+            showCustomConfirm('跳过题目', `确定要跳过这道题吗？\n正确答案是：${currentRiddle.answer}`, function(confirmed) {
+                if (confirmed) {
+                    currentRiddleIndex++;
+                    showCurrentRiddle();
+                }
+            });
+        }
+
+        // 退出登录
+        function logout() {
+            showCustomConfirm('退出登录', '确定要退出登录吗？', function(confirmed) {
+                if (confirmed) {
+                    // 取消订阅
+                    if (leaderboardSubscription) {
+                        leaderboardSubscription.unsubscribe();
+                        leaderboardSubscription = null;
+                    }
+                    
+                    // 重置游戏状态
+                    currentUser = null;
+                    currentRiddleIndex = 0;
+                    userScore = 0;
+                    
+                    // 清空表单
+                    document.getElementById('loginUsername').value = '';
+                    document.getElementById('loginPassword').value = '';
+                    document.getElementById('rememberPassword').checked = false;
+                    document.getElementById('loginError').textContent = '';
+                    
+                    // 显示登录界面
+                    document.getElementById('gameScreen').style.display = 'none';
+                    document.getElementById('loginScreen').style.display = 'block';
+                    
+                    // 切换到登录标签页
+                    switchTab('login');
+                }
+            });
+        }
+
+        // 显示反馈表单
+        function showFeedbackForm() {
+            if (!currentUser) {
+                showCustomAlert('提示', '请先登录后再提交反馈');
+                return;
+            }
+            
+            // 填充用户名
+            document.getElementById('feedbackUsername').value = currentUser.username;
+            
+            // 清空表单
+            document.getElementById('feedbackContact').value = '';
+            document.getElementById('feedbackContent').value = '';
+            document.getElementById('feedbackError').textContent = '';
+            
+            // 显示弹窗
+            document.getElementById('feedbackModal').classList.add('show');
+        }
+
+        // 关闭反馈表单
+        function closeFeedbackForm() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.remove('show');
+            // 强制重绘，确保在所有浏览器中都能正确隐藏
+            modal.style.display = 'none';
+            // 延迟恢复CSS控制，确保动画正常工作
+            setTimeout(function() {
+                modal.style.display = '';
+            }, 50);
+        }
+
+        // 提交反馈
+        async function submitFeedback() {
+            const contact = document.getElementById('feedbackContact').value.trim();
+            const content = document.getElementById('feedbackContent').value.trim();
+            const errorDiv = document.getElementById('feedbackError');
+            
+            // 验证输入
+            if (!content) {
+                errorDiv.textContent = '请输入反馈内容';
+                return;
+            }
+            
+            if (!supabaseClient) {
+                errorDiv.textContent = '数据库未配置，无法提交反馈';
+                return;
+            }
+            
+            try {
+                // 提交反馈到数据库
+                const { data, error } = await supabaseClient
+                    .from('feedback')
+                    .insert([
+                        {
+                            username: currentUser.username,
+                            user_id: currentUser.id ? parseInt(currentUser.id) : null,
+                            contact: contact || null,
+                            content: content
+                        }
+                    ])
+                    .select();
+
+                if (error) {
+                    console.error('提交反馈失败:', error);
+                    errorDiv.textContent = '提交失败，请重试';
+                    return;
+                }
+
+                // 提交成功
+                errorDiv.textContent = '';
+                
+                // 先关闭反馈表单
+                closeFeedbackForm();
+                
+                // 清空表单
+                document.getElementById('feedbackContact').value = '';
+                document.getElementById('feedbackContent').value = '';
+                
+                // 延迟显示成功提示，确保反馈表单已关闭
+                setTimeout(function() {
+                    showCustomAlert('反馈提交成功！', '感谢您的反馈！我们会认真考虑您的建议。');
+                }, 300);
+
+            } catch (error) {
+                console.error('反馈提交错误:', error);
+                errorDiv.textContent = '网络错误，请检查网络连接';
+            }
+        }
+
+        // 显示答题记录
+        async function showAnswersModal() {
+            if (!currentUser) {
+                showCustomAlert('提示', '请先登录后查看答题记录');
+                return;
+            }
+            
+            // 显示弹窗
+            document.getElementById('answersModal').classList.add('show');
+            
+            // 加载答题记录
+            await loadUserAnswers();
+        }
+
+        // 关闭答题记录弹窗
+        function closeAnswersModal() {
+            const modal = document.getElementById('answersModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            setTimeout(function() {
+                modal.style.display = '';
+            }, 50);
+        }
+
+        // 加载用户答题记录
+        async function loadUserAnswers() {
+            if (!supabaseClient || !currentUser) {
+                return;
+            }
+
+            const contentDiv = document.getElementById('answersContent');
+            contentDiv.innerHTML = '<div style="text-align: center; color: white; padding: 20px;">加载中...</div>';
+
+            try {
+                const { data: answers, error } = await supabaseClient
+                    .from('user_answers')
+                    .select('*')
+                    .eq('use_id', currentUser.id)
+                    .order('answered_at', { ascending: false });
+
+                if (error) {
+                    console.error('加载答题记录失败:', error);
+                    contentDiv.innerHTML = '<div style="text-align: center; color: #ffcdd2; padding: 20px;">加载失败，请重试</div>';
+                    return;
+                }
+
+                if (!answers || answers.length === 0) {
+                    contentDiv.innerHTML = '<div style="text-align: center; color: white; padding: 20px;">暂无答题记录</div>';
+                    return;
+                }
+
+                // 生成答题记录HTML
+                let html = '<div style="max-height: 400px; overflow-y: auto;">';
+                
+                // 统计信息
+                const totalAnswers = answers.length;
+                const correctAnswers = answers.filter(a => a.is_correct).length;
+                const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+                
+                html += `
+                    <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        <h4 style="margin: 0 0 15px 0; color: #fff; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">📊 答题统计</h4>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding: 5px 0;">
+                            <span style="color: #fff; font-weight: 500;">总答题数：</span><span style="color: #fff; font-weight: bold; font-size: 16px;">${totalAnswers}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding: 5px 0;">
+                            <span style="color: #fff; font-weight: 500;">正确答案：</span><span style="color: #fff; font-weight: bold; font-size: 16px;">${correctAnswers}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding: 5px 0;">
+                            <span style="color: #fff; font-weight: 500;">错误答案：</span><span style="color: #fff; font-weight: bold; font-size: 16px;">${totalAnswers - correctAnswers}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                            <span style="color: #fff; font-weight: 500;">正确率：</span><span style="color: #fff; font-weight: bold; font-size: 16px;">${accuracy}%</span>
+                        </div>
+                    </div>
+                `;
+
+                // 答题记录表格
+                html += '<h4 style="color: #fff; margin-bottom: 15px; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">📝 答题详情</h4>';
+                
+                if (answers.length > 0) {
+                    html += `
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: rgba(255,255,255,0.2);">
+                                        <th style="padding: 12px 8px; color: #fff; font-weight: bold; text-align: center; border-bottom: 2px solid rgba(255,255,255,0.3);">结果</th>
+                                        <th style="padding: 12px 8px; color: #fff; font-weight: bold; text-align: left; border-bottom: 2px solid rgba(255,255,255,0.3);">谜题</th>
+                                        <th style="padding: 12px 8px; color: #fff; font-weight: bold; text-align: left; border-bottom: 2px solid rgba(255,255,255,0.3);">你的答案</th>
+                                        <th style="padding: 12px 8px; color: #fff; font-weight: bold; text-align: left; border-bottom: 2px solid rgba(255,255,255,0.3);">正确答案</th>
+                                        <th style="padding: 12px 8px; color: #fff; font-weight: bold; text-align: center; border-bottom: 2px solid rgba(255,255,255,0.3);">成绩</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    answers.forEach((answer, index) => {
+                        const riddle = riddles[answer.riddle_id];
+                        const riddleText = riddle ? riddle.riddle : `谜题 #${answer.riddle_id}`;
+                        const correctAnswer = riddle ? riddle.answer : '未知';
+                        const isCorrect = answer.is_correct;
+                        const statusIcon = isCorrect ? '✅' : '❌';
+                        const statusColor = isCorrect ? '#00e676' : '#ff5252';  // 更鲜明的绿色和红色
+                        const score = answer.score || (isCorrect ? 10 : 0); // 显示分数，答对10分，答错0分
+                        const rowBg = index % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)';
+                        
+                        html += `
+                            <tr style="background: ${rowBg}; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: 10px 8px; text-align: center; font-size: 16px;">${statusIcon}</td>
+                                <td style="padding: 10px 8px; color: #fff; font-weight: 500; max-width: 200px; word-wrap: break-word;">${riddleText}</td>
+                                <td style="padding: 10px 8px; color: #fff; font-weight: bold;">${answer.user_answer}</td>
+                                <td style="padding: 10px 8px; color: #fff; font-weight: bold;">${correctAnswer}</td>
+                                <td style="padding: 10px 8px; color: #fff; font-size: 14px; text-align: center; font-weight: bold;">${score}分</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    html += '<div style="text-align: center; color: #ccc; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">暂无答题记录</div>';
+                }
+                
+                html += '</div>';
+                contentDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('加载答题记录错误:', error);
+                contentDiv.innerHTML = '<div style="text-align: center; color: #ffcdd2; padding: 20px;">网络错误，请重试</div>';
+            }
+        }
+
+        // 回车键提交答案（只在答案输入框中起作用）
+        document.getElementById('answerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                // 只有当输入框不为空且没有弹窗显示时才提交答案
+                const modal = document.getElementById('customModal');
+                if (this.value.trim() && !modal.classList.contains('show')) {
+                    submitAnswer();
+                }
+            }
+        });
+    </script>
+    
+    <!-- 反馈表单弹窗 -->
+    <div id="feedbackModal" class="custom-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>给作者反馈</h3>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm" style="text-align: left;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: white; margin-bottom: 5px; font-weight: bold;">反馈人：</label>
+                        <input type="text" id="feedbackUsername" readonly style="width: 100%; padding: 10px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); font-size: 14px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: white; margin-bottom: 5px; font-weight: bold;">联系方式（可选）：</label>
+                        <input type="text" id="feedbackContact" placeholder="请输入您的联系方式（邮箱、微信等）" style="width: 100%; padding: 10px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); font-size: 14px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; color: white; margin-bottom: 5px; font-weight: bold;">反馈内容<span style="color: #ff6b6b;">*</span>：</label>
+                        <textarea id="feedbackContent" placeholder="请输入您的反馈内容..." rows="4" style="width: 100%; padding: 10px; border: none; border-radius: 8px; background: rgba(255,255,255,0.9); font-size: 14px; resize: vertical; min-height: 80px;"></textarea>
+                    </div>
+                    <div id="feedbackError" style="color: #ffcdd2; font-size: 14px; margin-bottom: 10px; text-align: center;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="submitFeedback()">提交反馈</button>
+                <button class="modal-btn cancel-btn" onclick="closeFeedbackForm()">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 答题记录弹窗 -->
+    <div id="answersModal" class="custom-modal">
+        <div class="modal-content" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>我的答题记录</h3>
+            </div>
+            <div class="modal-body">
+                <div id="answersContent" style="text-align: left;">
+                    <div style="text-align: center; color: white; padding: 20px;">
+                        加载中...
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeAnswersModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 版权信息 -->
+    <div style="text-align: center; color: white; font-size: 12px; margin: 20px 0;">
+       © 2025 riddle.mumulife.net版权所有
+    </div>
+</body>
+</html>

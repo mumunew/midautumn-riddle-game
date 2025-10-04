@@ -1,0 +1,17 @@
+{
+  "functions": {
+    "api/config.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/config",
+      "destination": "/api/config.js"
+    }
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_ANON_KEY": "@supabase-anon-key"
+  }
+}
