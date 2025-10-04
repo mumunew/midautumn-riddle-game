@@ -1019,27 +1019,9 @@
 
         // 异步获取Supabase配置
         async function initializeSupabase() {
-            // 检查是否为本地开发环境
-            const isLocalDev = window.location.hostname === 'localhost' || 
-                              window.location.hostname === '127.0.0.1' || 
-                              window.location.protocol === 'file:';
-            
-            if (isLocalDev) {
-                // 本地开发环境直接使用配置
-                console.log('检测到本地开发环境，使用本地配置');
-                SUPABASE_CONFIG = {
-                    URL: 'https://emsmsbtmwumlljjvlieh.supabase.co',
-                    ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtc21zYnRtd3VtbGxqanZsaWVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzOTU4NTAsImV4cCI6MjA3NDk3MTg1MH0.x2Y1CG0jbi4NsYhWQ-GtwNIYvLNCLAJUsUdf7en7-M8'
-                };
-                supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
-                console.log('Supabase 客户端初始化成功（本地环境）');
-                await testSupabaseConnection();
-                return;
-            }
-            
-            // 生产环境通过API获取配置
+            // 只通过API获取配置，确保安全性
             try {
-                console.log('生产环境，通过API获取配置');
+                console.log('通过API获取Supabase配置');
                 const response = await fetch('/api/config');
                 if (!response.ok) {
                     throw new Error('Failed to fetch Supabase config');
@@ -1054,12 +1036,13 @@
                 // 初始化 Supabase 客户端
                 if (SUPABASE_CONFIG.URL && SUPABASE_CONFIG.ANON_KEY) {
                     supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
-                    console.log('Supabase 客户端初始化成功（生产环境）');
+                    console.log('Supabase 客户端初始化成功');
                     
                     // 测试连接
                     await testSupabaseConnection();
                 } else {
                     console.warn('Supabase 配置不完整');
+                    showNetworkError('Supabase 配置不完整');
                 }
             } catch (error) {
                 console.error('初始化 Supabase 失败:', error);
