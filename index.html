@@ -259,11 +259,11 @@
             transition: all 0.2s;
         }
 
-        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+        .checkbox-label input[type="checkbox"]:checked ~ .checkmark {
             background-color: #d32f2f;
         }
 
-        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+        .checkbox-label input[type="checkbox"]:checked ~ .checkmark::after {
              content: '';
              position: absolute;
              left: 5px;
@@ -311,6 +311,8 @@
              display: flex;
              gap: 10px;
              align-items: center;
+             justify-content: center;
+             margin-top: 20px;
          }
 
          .feedback-btn {
@@ -579,6 +581,58 @@
             animation: fadeInUp 0.6s ease-out 0.2s both;
         }
 
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 0 auto 25px auto;
+            width: 100%;
+            max-width: 400px;
+            align-items: center;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ffd93d;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            box-shadow: 0 3px 10px rgba(255, 217, 61, 0.2);
+        }
+
+        .option-btn:hover {
+            border-color: #d32f2f;
+            background: rgba(255, 217, 61, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
+        }
+
+        .option-btn.selected {
+            border-color: #d32f2f;
+            background: rgba(211, 47, 47, 0.1);
+            color: #d32f2f;
+            font-weight: 600;
+        }
+
+        .option-btn.correct {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+
+        .option-btn.incorrect {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
         .answer-input {
             width: 320px;
             padding: 18px 20px;
@@ -593,6 +647,7 @@
             font-family: inherit;
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(255, 217, 61, 0.2);
+            display: none; /* 隐藏原输入框 */
         }
 
         .answer-input:focus {
@@ -777,24 +832,29 @@
 
             .lantern-container {
                 order: 2;
-                margin: 10px 0;
+                margin: -20px 0 20px 0;
+                transform: translateY(0);
+            }
+
+            .lantern-top-line {
+                margin: 20px auto 0 auto;
             }
 
             .lantern {
-                width: 200px;
-                height: 280px;
+                width: 250px;
+                height: 350px;
                 margin: 0;
             }
 
             .lantern-body {
-                width: 160px;
-                height: 160px;
+                width: 250px;
+                height: 250px;
             }
 
             .riddle-text {
-                font-size: 1rem;
-                padding: 15px;
-                max-width: 140px;
+                font-size: 1.1rem;
+                padding: 20px;
+                max-width: 220px;
                 line-height: 1.4;
             }
 
@@ -805,7 +865,7 @@
 
             .answer-area {
                 order: 3;
-                margin: 20px 0 10px 0;
+                margin: 30px 0 40px 0;
                 padding: 20px 15px;
                 width: 100%;
                 max-width: 100%;
@@ -828,6 +888,7 @@
                 flex-wrap: wrap;
                 gap: 8px;
                 justify-content: center;
+                margin-top: 20px;
             }
 
             .header-buttons button {
@@ -845,9 +906,22 @@
                 margin-bottom: 15px;
             }
 
+            .options-container {
+                max-width: 100%;
+                gap: 10px;
+                margin: -20px auto 0px auto;
+            }
+
+            .option-btn {
+                padding: 12px 15px;
+                font-size: 14px;
+                border-radius: 10px;
+            }
+
             .button-group {
                 flex-direction: column;
                 gap: 10px;
+                margin-top: 10px;
             }
 
             .button-group .btn {
@@ -857,7 +931,7 @@
             }
 
             .leaderboard {
-                margin: 20px 0;
+                margin: 60px 0 20px 0;
                 padding: 20px 15px;
             }
 
@@ -889,19 +963,19 @@
             }
 
             .lantern {
-                width: 180px;
-                height: 250px;
+                width: 220px;
+                height: 300px;
             }
 
             .lantern-body {
-                width: 140px;
-                height: 140px;
+                width: 220px;
+                height: 220px;
             }
 
             .riddle-text {
-                font-size: 0.9rem;
-                padding: 12px;
-                max-width: 120px;
+                font-size: 1rem;
+                padding: 15px;
+                max-width: 200px;
             }
 
             .answer-area {
@@ -1060,12 +1134,13 @@
                 </div>
                 <div class="input-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="rememberPassword">
+                        <input type="checkbox" id="rememberPassword" checked>
                         <span class="checkmark"></span>
                         记住密码
                     </label>
                 </div>
                 <button class="btn" onclick="login()">登录游戏</button>
+                <button class="btn" onclick="testLogin()" style="background: linear-gradient(45deg, #4CAF50, #66BB6A);">测试登录</button>
                 <div id="loginError" class="error-message"></div>
             </div>
             
@@ -1119,16 +1194,31 @@
                 <div class="game-header">
                     <div class="score-display"></div>
                     <div class="header-buttons">
-                        <button class="answers-btn" onclick="showAnswersModal()">答题记录</button>
-                        <button class="feedback-btn" onclick="showFeedbackForm()">给作者反馈</button>
-                        <button class="logout-btn" onclick="logout()">退出登录</button>
                     </div>
                 </div>
-                <input type="text" id="answerInput" class="answer-input" placeholder="请输入答案" maxlength="10">
+                <!-- 选择题界面 -->
+                <div class="options-container" id="optionsContainer">
+                    <button class="option-btn" onclick="selectOption(0)">A. 选项1</button>
+                    <button class="option-btn" onclick="selectOption(1)">B. 选项2</button>
+                    <button class="option-btn" onclick="selectOption(2)">C. 选项3</button>
+                    <button class="option-btn" onclick="selectOption(3)">D. 选项4</button>
+                </div>
+                
+                <!-- 输入题界面 -->
+                <div class="input-container" id="inputContainer" style="display: none;">
+                    <input type="text" id="answerInput" class="answer-input" placeholder="请输入答案" maxlength="10">
+                    <button class="btn primary" onclick="submitAnswer()">提交答案</button>
+                </div>
+                
                 <div class="button-group">
-                    <button class="btn" onclick="submitAnswer()">提交答案</button>
                     <button class="btn secondary" onclick="showAnswer()">显示答案</button>
                     <button class="btn secondary" onclick="skipRiddle()">跳过</button>
+                </div>
+                
+                <div class="header-buttons">
+                    <button class="answers-btn" onclick="showAnswersModal()">答题记录</button>
+                    <button class="feedback-btn" onclick="showFeedbackForm()">给作者反馈</button>
+                    <button class="logout-btn" onclick="logout()">退出登录</button>
                 </div>
                 
                 <div id="feedback" class="feedback"></div>
@@ -1170,7 +1260,26 @@
 
         // 异步获取Supabase配置
         async function initializeSupabase() {
-            // 只通过API获取配置，确保安全性
+            // 检查是否为本地开发环境
+            const isLocalDev = window.location.hostname === 'localhost' || 
+                              window.location.hostname === '127.0.0.1' || 
+                              window.location.hostname.includes('192.168.') ||
+                              window.location.protocol === 'file:';
+            
+            if (isLocalDev) {
+                // 本地开发环境使用演示模式
+                console.log('检测到本地环境，使用演示模式');
+                SUPABASE_CONFIG = {
+                    URL: 'https://emsmsbtmwumlljjvlieh.supabase.co',
+                    ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtc21zYnRtd3VtbGxqanZsaWVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzOTU4NTAsImV4cCI6MjA3NDk3MTg1MH0.x2Y1CG0jbi4NsYhWQ-GtwNIYvLNCLAJUsUdf7en7-M8'
+                };
+                supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+                console.log('Supabase 客户端初始化成功（演示模式）');
+                await testSupabaseConnection();
+                return;
+            }
+            
+            // 生产环境通过API获取配置
             try {
                 console.log('通过API获取Supabase配置');
                 const response = await fetch('/api/config');
@@ -1376,17 +1485,19 @@
             // 隐藏取消按钮
             cancelBtn.style.display = 'none';
             
-            // 移除答案输入框的焦点，防止回车键重复提交
-            document.getElementById('answerInput').blur();
-            
             // 让确认按钮获得焦点，这样回车键会触发确认按钮
             setTimeout(() => {
                 confirmBtn.focus();
             }, 100);
             
+            // 清除之前的事件监听器
+            confirmBtn.onclick = null;
+            modal.onclick = null;
+            
             // 确定按钮事件
             confirmBtn.onclick = function() {
                 modal.classList.remove('show');
+                document.removeEventListener('keydown', handleKeyPress);
                 if (callback) callback(true);
             };
             
@@ -1394,6 +1505,7 @@
             modal.onclick = function(e) {
                 if (e.target === modal) {
                     modal.classList.remove('show');
+                    document.removeEventListener('keydown', handleKeyPress);
                     if (callback) callback(false);
                 }
             };
@@ -1402,8 +1514,8 @@
             const handleKeyPress = function(e) {
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     modal.classList.remove('show');
-                    if (callback) callback(true);
                     document.removeEventListener('keydown', handleKeyPress);
+                    if (callback) callback(true);
                 }
             };
             
@@ -1569,6 +1681,13 @@
                 return;
             }
 
+            // 检查用户名是否包含特殊字符
+            const specialChars = /[./@#$%^&*()+=\[\]{}|\\:";'<>?,]/;
+            if (specialChars.test(username)) {
+                errorDiv.textContent = '用户名不能包含特殊字符（如 . / @ 等）';
+                return;
+            }
+
             if (!password) {
                 errorDiv.textContent = '请输入密码';
                 return;
@@ -1719,6 +1838,23 @@
             }
         }
 
+        // 测试登录函数（用于调试）
+        function testLogin() {
+            // 模拟登录成功
+            currentUser = {
+                id: 'test-user',
+                username: '测试用户',
+                score: 0
+            };
+            userScore = 0;
+            
+            // 清除错误信息
+            document.getElementById('loginError').textContent = '';
+            
+            // 启动游戏
+            startGame();
+        }
+
         // 开始游戏
         function startGame() {
             document.getElementById('loginScreen').style.display = 'none';
@@ -1778,10 +1914,190 @@
             return availableIndices[0];
         }
 
-        // 显示当前谜题
+        // 全局变量
+        let currentOptions = []; // 当前题目的选项
+        let correctOptionIndex = -1; // 正确答案的索引
+
+        // 创建提示类型到答案类别的映射
+        function getCategoryFromHint(hint) {
+            if (hint.includes('打一字')) return 'character';
+            if (hint.includes('打一动物') || hint.includes('打一昆虫') || hint.includes('打一生物')) return 'animal';
+            if (hint.includes('打一植物') || hint.includes('打一花卉') || hint.includes('打一蔬菜') || hint.includes('打一水果') || hint.includes('打一粮食作物')) return 'plant';
+            if (hint.includes('打一乐器')) return 'instrument';
+            if (hint.includes('打一家电') || hint.includes('打一日用品') || hint.includes('打一工具') || hint.includes('打一家具') || hint.includes('打一医疗用品') || hint.includes('打一学习用品') || hint.includes('打一交通工具') || hint.includes('打一物品')) return 'object';
+            if (hint.includes('打一人体部位')) return 'body_part';
+            if (hint.includes('打一服饰')) return 'clothing';
+            if (hint.includes('打一食品') || hint.includes('打一食物')) return 'food';
+            if (hint.includes('打一地名')) return 'place';
+            if (hint.includes('打一自然景观') || hint.includes('打一自然物')) return 'nature';
+            if (hint.includes('脑筋急转弯')) return 'brain_teaser';
+            if (hint.includes('打一历史人物')) return 'person';
+            if (hint.includes('打一歌曲名') || hint.includes('打一歌名')) return 'song';
+            if (hint.includes('打一海洋生物')) return 'sea_creature';
+            return 'general';
+        }
+
+        // 根据类别获取同类型的答案
+        function getAnswersByCategory(category, excludeAnswer) {
+            return riddles.filter(riddle => {
+                const riddleCategory = getCategoryFromHint(riddle.hint);
+                return riddleCategory === category && riddle.answer !== excludeAnswer;
+            }).map(riddle => riddle.answer);
+        }
+
+        // 生成干扰选项
+        function generateDistractors(correctAnswer, riddleIndex) {
+            const currentRiddle = riddles[riddleIndex];
+            const category = getCategoryFromHint(currentRiddle.hint);
+            const distractors = [];
+            
+            // 首先尝试从同类别中选择干扰项
+            const sameTypeAnswers = getAnswersByCategory(category, correctAnswer);
+            
+            // 从同类型答案中随机选择干扰项
+            const shuffledSameType = [...sameTypeAnswers].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < Math.min(3, shuffledSameType.length); i++) {
+                distractors.push(shuffledSameType[i]);
+            }
+            
+            // 如果同类型的答案不够3个，从其他类型中补充
+            if (distractors.length < 3) {
+                const allOtherAnswers = riddles.map(r => r.answer)
+                    .filter(a => a !== correctAnswer && !distractors.includes(a));
+                
+                while (distractors.length < 3 && allOtherAnswers.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * allOtherAnswers.length);
+                    const distractor = allOtherAnswers[randomIndex];
+                    distractors.push(distractor);
+                    allOtherAnswers.splice(randomIndex, 1);
+                }
+            }
+            
+            // 如果还是不够，添加一些按类别分类的通用干扰项
+            if (distractors.length < 3) {
+                const categoryDistractors = {
+                    'character': ['香', '府', '汁', '拿', '肉', '夹', '夷', '告', '奈', '料', '米', '木', '火', '土', '金'],
+                    'animal': ['老虎', '狮子', '大象', '熊猫', '猴子', '兔子', '狐狸', '狼', '鹿', '马', '牛', '羊', '鸡', '鸭', '鹅'],
+                    'plant': ['玫瑰', '牡丹', '菊花', '荷花', '梅花', '兰花', '竹子', '松树', '柳树', '桃树', '苹果', '梨', '橙子', '香蕉', '葡萄'],
+                    'instrument': ['钢琴', '小提琴', '古筝', '琵琶', '笛子', '萧', '鼓', '锣', '唢呐', '口琴', '二胡', '吉他', '萨克斯', '小号', '长笛'],
+                    'object': ['酒精', '打火机', '注射器', '剪刀', '镜子', '牙膏', '手电筒', '桌子', '椅子', '床', '柜子', '电视', '冰箱', '洗衣机', '空调'],
+                    'food': ['茶叶蛋', '爆米花', '提拉米苏', '刀削面', '米饭', '面条', '包子', '饺子', '蛋糕', '面包'],
+                    'body_part': ['手指', '眼睛', '鼻子', '嘴巴', '耳朵', '头发', '手臂', '腿', '脚', '心脏'],
+                    'clothing': ['袜子', '帽子', '衣服', '裤子', '鞋子', '手套', '围巾', '领带', '裙子', '外套'],
+                    'place': ['北京', '上海', '广州', '深圳', '杭州', '南京', '西安', '成都', '重庆', '天津'],
+                    'nature': ['天上的星星', '瀑布', '月亮', '太阳', '星星', '花朵', '树叶', '水', '火', '风', '雨', '雪'],
+                    'brain_teaser': ['傻瓜', '理发师', '做梦', '打哈欠', '自己', '错字', '空调', '唠叨', '猜不透', '时间'],
+                    'general': ['月亮', '太阳', '星星', '花朵', '树叶', '水', '火', '风', '雨', '雪']
+                };
+                
+                const fallbackDistractors = categoryDistractors[category] || categoryDistractors['general'];
+                
+                while (distractors.length < 3) {
+                    const randomDistractor = fallbackDistractors[Math.floor(Math.random() * fallbackDistractors.length)];
+                    if (!distractors.includes(randomDistractor) && randomDistractor !== correctAnswer) {
+                        distractors.push(randomDistractor);
+                    }
+                }
+            }
+            
+            return distractors.slice(0, 3);
+        }
+
+        // 生成选项
+        function generateOptions(correctAnswer, riddleIndex) {
+            const distractors = generateDistractors(correctAnswer, riddleIndex);
+            const options = [...distractors, correctAnswer];
+            
+            // 随机打乱选项顺序
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            
+            // 找到正确答案的新位置
+            correctOptionIndex = options.indexOf(correctAnswer);
+            currentOptions = options;
+            
+            return options;
+        }
+
+        // 显示选项
+        function displayOptions(options) {
+            const optionButtons = document.querySelectorAll('.option-btn');
+            const labels = ['A', 'B', 'C', 'D'];
+            
+            options.forEach((option, index) => {
+                if (optionButtons[index]) {
+                    optionButtons[index].textContent = `${labels[index]}. ${option}`;
+                    optionButtons[index].className = 'option-btn'; // 重置样式
+                }
+            });
+        }
+
+        // 选择选项
+        function selectOption(optionIndex) {
+            // 清除所有选项的选中状态
+            const optionButtons = document.querySelectorAll('.option-btn');
+            optionButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // 标记选中的选项
+            optionButtons[optionIndex].classList.add('selected');
+            
+            // 立即提交答案
+            setTimeout(() => {
+                submitOptionAnswer(optionIndex);
+            }, 300); // 短暂延迟以显示选中效果
+        }
+
+        // 提交选项答案
+        async function submitOptionAnswer(selectedIndex) {
+            if (currentRiddleIndex >= riddles.length) {
+                showCustomAlert('提示', '游戏已结束');
+                return;
+            }
+
+            const currentRiddle = riddles[currentRiddleIndex];
+            const selectedAnswer = currentOptions[selectedIndex];
+            const isCorrect = selectedIndex === correctOptionIndex;
+            
+            // 显示答案反馈
+            const optionButtons = document.querySelectorAll('.option-btn');
+            optionButtons.forEach((btn, index) => {
+                btn.style.pointerEvents = 'none'; // 禁用点击
+                if (index === correctOptionIndex) {
+                    btn.classList.add('correct');
+                } else if (index === selectedIndex && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            if (isCorrect) {
+                // 答对了，加10分
+                userScore += 10;
+                await updateUserScore();
+                await recordUserAnswer(currentRiddleIndex, selectedAnswer, true);
+                showFireworks();
+                showCustomAlert('恭喜！', `答对了！获得10分！\n正确答案是：${currentRiddle.answer}\n你选择的是：${selectedAnswer}`, function() {
+                    // 将当前谜题添加到已答谜题集合中
+                    answeredRiddles.add(currentRiddleIndex);
+                    showCurrentRiddle();
+                });
+            } else {
+                // 答错了
+                await recordUserAnswer(currentRiddleIndex, selectedAnswer, false);
+                showCustomAlert('很遗憾', `答错了！\n正确答案是：${currentRiddle.answer}\n你选择的是：${selectedAnswer}`, function() {
+                    // 将当前谜题添加到已答谜题集合中
+                    answeredRiddles.add(currentRiddleIndex);
+                    showCurrentRiddle();
+                });
+            }
+        }
         function showCurrentRiddle() {
+            console.log('showCurrentRiddle 函数被调用');
+            
             // 获取下一个随机谜题索引
             const nextIndex = getNextRandomRiddleIndex();
+            console.log('获取到的谜题索引:', nextIndex);
             
             if (nextIndex === -1) {
                 // 所有题目完成
@@ -1793,11 +2109,61 @@
             // 更新当前谜题索引
             currentRiddleIndex = nextIndex;
             const currentRiddle = riddles[currentRiddleIndex];
+            console.log('当前谜题:', currentRiddle);
             
             document.getElementById('riddleText').textContent = currentRiddle.riddle; // 使用 'riddle' 字段
             document.getElementById('riddleHint').textContent = `提示：${currentRiddle.hint || ''}`; // 显示 hint
-            document.getElementById('answerInput').value = '';
-            document.getElementById('answerInput').focus();
+            
+            // 根据谜题是否有options字段来决定显示选择题还是输入题界面
+            const optionsContainer = document.getElementById('optionsContainer');
+            const inputContainer = document.getElementById('inputContainer');
+            console.log('选项容器元素:', optionsContainer);
+            console.log('输入容器元素:', inputContainer);
+            
+            if (currentRiddle.options && currentRiddle.options.length > 0) {
+                console.log('显示选择题界面，选项:', currentRiddle.options);
+                // 显示选择题界面
+                optionsContainer.style.display = 'block';
+                inputContainer.style.display = 'none';
+                
+                // 创建选项副本并随机打乱顺序
+                const shuffledOptions = [...currentRiddle.options];
+                // Fisher-Yates 洗牌算法
+                for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+                }
+                
+                // 显示打乱后的选项
+                displayOptions(shuffledOptions);
+                
+                // 找到正确答案在打乱后选项中的索引
+                correctOptionIndex = shuffledOptions.indexOf(currentRiddle.answer);
+                currentOptions = shuffledOptions;
+                console.log('正确答案:', currentRiddle.answer);
+                console.log('打乱后的选项:', shuffledOptions);
+                console.log('正确答案索引:', correctOptionIndex);
+                
+                // 重新启用选项按钮
+                const optionButtons = document.querySelectorAll('.option-btn');
+                console.log('找到的选项按钮:', optionButtons.length);
+                optionButtons.forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.classList.remove('selected', 'correct', 'incorrect');
+                });
+            } else {
+                console.log('显示输入题界面');
+                // 显示输入题界面
+                optionsContainer.style.display = 'none';
+                inputContainer.style.display = 'block';
+                
+                // 清空并聚焦输入框
+                const answerInput = document.getElementById('answerInput');
+                if (answerInput) {
+                    answerInput.value = '';
+                    answerInput.focus();
+                }
+            }
         }
 
         // 提交答案
@@ -1816,10 +2182,19 @@
 
             const currentRiddle = riddles[currentRiddleIndex];
             
+            // 去除标点符号的函数
+            function removePunctuation(str) {
+                return str.replace(/[，。！？；：""''（）【】《》、]/g, '').toLowerCase();
+            }
+            
+            // 清理用户答案和正确答案
+            const cleanUserAnswer = removePunctuation(userAnswer);
+            const cleanCorrectAnswer = removePunctuation(currentRiddle.answer);
+            
             // 支持多种匹配方式：完全匹配、包含匹配、同义词匹配
-            const isAnswerCorrect = userAnswer === currentRiddle.answer ||
-                                  currentRiddle.answer.includes(userAnswer) ||
-                                  userAnswer.includes(currentRiddle.answer) ||
+            const isAnswerCorrect = cleanUserAnswer === cleanCorrectAnswer ||
+                                  cleanCorrectAnswer.includes(cleanUserAnswer) ||
+                                  cleanUserAnswer.includes(cleanCorrectAnswer) ||
                                   // 同义词匹配：检查用户答案是否是正确答案的同义词
                                   (synonymMap[currentRiddle.answer] && synonymMap[currentRiddle.answer].includes(userAnswer)) ||
                                   // 同义词匹配：检查正确答案是否是用户答案的同义词
@@ -1831,7 +2206,7 @@
                 await updateUserScore();
                 await recordUserAnswer(currentRiddleIndex, userAnswer, true);
                 showFireworks();
-                showCustomAlert('恭喜！', `答对了！获得10分！\n答案是：${currentRiddle.answer}`, function() {
+                showCustomAlert('恭喜！', `答对了！获得10分！\n正确答案是：${currentRiddle.answer}\n你输入的是：${userAnswer}`, function() {
                     // 将当前谜题添加到已答谜题集合中
                     answeredRiddles.add(currentRiddleIndex);
                     currentRiddleIndex = getNextRandomRiddleIndex();
@@ -1840,7 +2215,7 @@
             } else {
                 // 答错了
                 await recordUserAnswer(currentRiddleIndex, userAnswer, false);
-                showCustomAlert('很遗憾', `答错了！\n正确答案是：${currentRiddle.answer}`, function() {
+                showCustomAlert('很遗憾', `答错了！\n正确答案是：${currentRiddle.answer}\n你输入的是：${userAnswer}`, function() {
                     // 将当前谜题添加到已答谜题集合中
                     answeredRiddles.add(currentRiddleIndex);
                     currentRiddleIndex = getNextRandomRiddleIndex();
@@ -2187,10 +2562,18 @@
 
             const currentRiddle = riddles[currentRiddleIndex];
             
+            // 高亮正确答案选项
+            const optionButtons = document.querySelectorAll('.option-btn');
+            optionButtons.forEach(btn => {
+                if (btn.textContent === currentRiddle.answer) {
+                    btn.classList.add('correct');
+                }
+                btn.style.pointerEvents = 'none'; // 禁用点击
+            });
+            
             showCustomAlert('答案', `正确答案是：${currentRiddle.answer}\n\n${currentRiddle.hint || ''}\n\n显示答案后不会获得分数，请继续下一题`, function() {
                 // 将当前谜题添加到已答谜题集合中
                 answeredRiddles.add(currentRiddleIndex);
-                currentRiddleIndex = getNextRandomRiddleIndex();
                 showCurrentRiddle();
             });
         }
@@ -2205,7 +2588,8 @@
             const currentRiddle = riddles[currentRiddleIndex];
             showCustomConfirm('跳过题目', `确定要跳过这道题吗？\n正确答案是：${currentRiddle.answer}`, function(confirmed) {
                 if (confirmed) {
-                    currentRiddleIndex++;
+                    // 将当前谜题添加到已答谜题集合中
+                    answeredRiddles.add(currentRiddleIndex);
                     showCurrentRiddle();
                 }
             });
@@ -2225,6 +2609,9 @@
                     currentUser = null;
                     currentRiddleIndex = 0;
                     userScore = 0;
+                    
+                    // 清除保存的登录信息
+                    localStorage.removeItem('riddle_game_login');
                     
                     // 清空表单
                     document.getElementById('loginUsername').value = '';
