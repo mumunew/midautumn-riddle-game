@@ -1474,7 +1474,6 @@
                     </label>
                 </div>
                 <button class="btn" onclick="login()">登录游戏</button>
-                <button class="btn" onclick="testLogin()" style="background: linear-gradient(45deg, #4CAF50, #66BB6A);">测试登录</button>
                 <div id="loginError" class="error-message"></div>
             </div>
             
@@ -1652,10 +1651,20 @@
             if (isLocalDev) {
                 // 本地开发环境使用演示模式
                 console.log('检测到本地环境，使用演示模式');
-                SUPABASE_CONFIG = {
-                    URL: 'https://emsmsbtmwumlljjvlieh.supabase.co',
-                    ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtc21zYnRtd3VtbGxqanZsaWVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzOTU4NTAsImV4cCI6MjA3NDk3MTg1MH0.x2Y1CG0jbi4NsYhWQ-GtwNIYvLNCLAJUsUdf7en7-M8'
-                };
+                // 注意：生产环境中应该通过环境变量或API获取配置
+                // 这里仅用于本地开发测试
+                try {
+                    const response = await fetch('/api/config');
+                    if (response.ok) {
+                        const config = await response.json();
+                        SUPABASE_CONFIG = config;
+                    } else {
+                        throw new Error('API config not available');
+                    }
+                } catch (error) {
+                    console.log('API配置不可用，跳过Supabase初始化');
+                    return;
+                }
                 supabaseClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
                 console.log('Supabase 客户端初始化成功（演示模式）');
                 await testSupabaseConnection();
@@ -2221,22 +2230,7 @@
             }
         }
 
-        // 测试登录函数（用于调试）
-        function testLogin() {
-            // 模拟登录成功
-            currentUser = {
-                id: 'test-user',
-                username: '测试用户',
-                score: 0
-            };
-            userScore = 0;
-            
-            // 清除错误信息
-            document.getElementById('loginError').textContent = '';
-            
-            // 启动游戏
-            startGame();
-        }
+
 
         // 开始游戏
         function startGame() {
