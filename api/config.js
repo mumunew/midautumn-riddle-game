@@ -1,4 +1,9 @@
 export default function handler(req, res) {
+  // 设置 CORS 头
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   // 只允许GET请求
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
