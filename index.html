@@ -1829,6 +1829,12 @@
                 return;
             }
 
+            // 检查当前用户是否在前10名中
+            const currentUserInTop = users.find(user => 
+                currentUser && user.username === currentUser.username
+            );
+
+            // 显示前10名用户
             users.forEach((user, index) => {
                 const item = document.createElement('div');
                 item.className = 'leaderboard-item';
@@ -1846,6 +1852,70 @@
                 
                 leaderboardList.appendChild(item);
             });
+
+            // 如果当前用户不在前10名中，在末尾显示当前用户的排名信息
+            if (currentUser && !currentUserInTop) {
+                displayCurrentUserRank();
+            }
+        }
+
+        // 显示当前用户的排名信息
+        async function displayCurrentUserRank() {
+            if (!supabaseClient || !currentUser) {
+                return;
+            }
+
+            try {
+                // 获取当前用户在所有用户中的排名
+                const { data: allUsers, error } = await supabaseClient
+                    .from('users')
+                    .select('username, score, updated_at')
+                    .order('score', { ascending: false })
+                    .order('updated_at', { ascending: true });
+
+                if (error) {
+                    console.error('获取用户排名失败:', error);
+                    return;
+                }
+
+                // 找到当前用户的排名
+                const currentUserRank = allUsers.findIndex(user => 
+                    user.username === currentUser.username
+                ) + 1;
+
+                // 创建分隔线
+                const separator = document.createElement('div');
+                separator.style.cssText = `
+                    text-align: center;
+                    margin: 15px 0 10px 0;
+                    color: #666;
+                    font-size: 14px;
+                    border-top: 1px solid rgba(255,255,255,0.3);
+                    padding-top: 10px;
+                `;
+                separator.textContent = '我的排名';
+                document.getElementById('leaderboardList').appendChild(separator);
+
+                // 创建当前用户排名条目
+                const currentUserItem = document.createElement('div');
+                currentUserItem.className = 'leaderboard-item current-user';
+                currentUserItem.style.cssText = `
+                    background: rgba(211, 47, 47, 0.3);
+                    border: 2px solid #d32f2f;
+                    font-weight: bold;
+                    margin-top: 5px;
+                `;
+
+                currentUserItem.innerHTML = `
+                    <span class="rank">${currentUserRank}</span>
+                    <span class="username">${currentUser.username}</span>
+                    <span class="score">${currentUser.score}分</span>
+                `;
+                
+                document.getElementById('leaderboardList').appendChild(currentUserItem);
+            } catch (error) {
+                console.error('显示当前用户排名错误:', error);
+            }
         }
 
         // 撒花庆祝效果
